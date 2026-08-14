@@ -1,0 +1,50 @@
+[core]
+excludesfile = ~/.config/station/global_gitignore
+pager = delta
+
+[filter "lfs"]
+required = true
+clean    = git-lfs clean -- %f
+smudge   = git-lfs smudge -- %f
+process  = git-lfs filter-process
+
+[init]
+defaultBranch = master
+
+[pull]
+rebase = false
+
+[interactive]
+difffilter = delta --color-only
+
+[add.interactive]
+useBuiltin = false
+
+[delta]
+navigate     = true
+light        = false
+side-by-side = true
+line-numbers = true
+
+[merge]
+conflictstyle = diff3
+
+[diff]
+colorMoved = default
+
+[includeIf "gitdir:~/projects/work/"]
+path = ~/.config/station/work.gitconfig
+
+[includeIf "gitdir:~/projects/personal/"]
+path = ~/.config/station/personal.gitconfig
+
+[alias]
+append = town append
+diff-parent = town diff-parent
+hack = town hack
+prepend = town prepend
+propose = town propose
+set-parent = town set-parent
+ship = town ship
+sync = town sync
+

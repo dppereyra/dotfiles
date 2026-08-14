@@ -1,0 +1,16 @@
+[Unit]
+Description=Mopidy Music Server
+After=avahi-daemon.service
+After=dbus.service
+After=network.service
+After=nss-lookup.target
+After=remote-fs.target
+After=sound.target
+
+[Service]
+Environment=MOPIDY_CONF=~/.config/mopidy/main.conf
+ExecStart=/bin/mopidy \
+  --config ${MOPIDY_CONF}
+
+[Install]
+WantedBy=default.target

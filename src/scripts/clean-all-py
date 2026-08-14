@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z .git ]; then
+    echo "This script must be run from the root of the repository."
+    exit 1
+fi
+
+rm -rfv htmlcov
+rm -rfv dist
+rm -rfv build
+rm -rfv coverage.xml
+rm -rfv .coverage
+rm -rfv .pytest_cache
+rm -rfv .tox
+rm -rfv .pdm-build
+find . -type d -name "__pycache__" -exec rm -rfv {} +
+find . | grep -E "(__pycache__|\.pyc|\.pyo|\.egg-info$)" | xargs rm -rfv
+rm -rfv .eggs

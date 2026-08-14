@@ -1,0 +1,9 @@
+[general]
+live_config_reload = true
+
+import = [
+  "~/.config/alacritty/environment.toml",
+  "~/.config/alacritty/main.toml",
+  "~/.config/alacritty/inputs.toml",
+  "~/.config/alacritty/themes/tomorrow-night-blue.toml",
+]

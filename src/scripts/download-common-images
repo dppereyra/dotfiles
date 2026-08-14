@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -ex
+
+# Language images
+docker image pull python:3.13-slim-trixie
+docker image pull python:3.14-slim-trixie
+docker image pull node:24-trixie-slim
+docker image pull node:22-trixie-slim
+docker image pull node:20-trixie-slim
+
+# OS images
+docker image pull debian:trixie-slim
+docker image pull archlinux:base-devel
+
+# Database images
+docker image pull postgres:18.0-trixie
+docker image pull mariadb:12.0-noble
+docker image pull redis:8.2-bookworm
+
+# Web server/proxy images
+docker image pull nginx:1.29-bookworm
+docker image pull haproxy:3.2-trixie
+
+# Automation
+docker image pull jenkins/jenkins:2.529-slim-jdk21
+docker image pull n8nio/n8n:1.114.3
+docker image pull activepieces/activepieces:0.70.4
+
+# Application images
+docker image pull rabbitmq:4.1-management
+
+# Devcontainer images
+docker image pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+docker image pull mcr.microsoft.com/devcontainers/universal:noble
+docker image pull mcr.microsoft.com/devcontainers/javascript-node:dev-24-trixie
+docker image pull mcr.microsoft.com/devcontainers/typescript-node:dev-24-trixie
+docker image pull mcr.microsoft.com/devcontainers/python:dev-3.13-trixie

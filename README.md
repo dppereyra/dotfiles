@@ -1,2 +1,41 @@
 # dotfiles
-Dotfiles
+
+Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/).
+
+## Quick start
+
+```bash
+git clone git@github.com:dppereyra/dotfiles.git
+cd dotfiles
+./bootstrap.sh
+```
+
+`bootstrap.sh` will:
+1. Confirm `stow` is installed.
+2. Refuse to proceed if any `~/.config/<tool>` target already exists as a real (non-symlink) directory — review and clear those first so Stow can create clean directory-level symlinks instead of folding into per-file ones.
+3. `stow` both packages: `src/configs` → `$HOME`, `src/scripts` → `$HOME/.config` (so `~/.config/scripts` becomes one symlink).
+4. Run every installer in `scripts/` (asdf, pyenv, goenv, nodenv, rbenv, phpenv, zinit, opencode, claude, neovim, tmux plugin manager).
+
+Each installer in `scripts/` is also safe to run standalone — that's the intended path for ephemeral dev environments (GitHub Codespaces, DevPod, Ona/Gitpod): clone the repo and run just the installer(s) you need, e.g. `scripts/install-neovim.sh`, without going through the full personal-machine `bootstrap.sh`.
+
+## What's not automated (manual steps)
+
+- **tmux plugins**: `bootstrap.sh` clones TPM (tmux plugin manager) to `~/.tmux/plugins/tpm`, but the actual plugin install has to happen interactively — open tmux and press `prefix + I`.
+- **fzf / fd**: referenced by the `tmux-fzf` / `tmux-fzf-url` plugins and general shell use, but not installed by any script here — install with your package manager, e.g. `brew install fzf fd`.
+- **gitmux / lazygit**: referenced by `.tmux.conf`'s catppuccin status segments — install with your package manager if not already present.
+- **Real secrets**: `~/.config/station/runcom/s97_work_config.sample.zsh` and `s98_secrets.sample.zsh` are templates. Copy them to `s97_work_config.zsh` / `s98_secrets.zsh` and fill in real values — both stay untracked (gitignored via `~/.config/station/global_gitignore`), never commit real values.
+- **A Nerd Font**: needed for the catppuccin theming in tmux/p10k — this is a terminal-app setting, not something a script can install for you.
+
+## Stow packages
+
+```bash
+stow --target=$HOME --dir=src configs          # dotfiles -> $HOME
+stow --target=$HOME/.config --dir=src scripts  # shell utility scripts -> ~/.config/scripts
+```
+
+Add `--simulate` to either command for a dry run, or replace the implicit stow action with `--delete` to remove the symlinks.
+
+## Dependencies
+
+- [GNU Stow](https://www.gnu.org/software/stow/) (`brew install stow` on macOS)
+- `git`, `curl`, `tar` for the tool installers in `scripts/`
