@@ -1,0 +1,32 @@
+version: "1"
+
+global:
+  default-command: snapshots
+  initialize: false
+  priority: low
+  min-memory: 100
+
+default:
+  backup:
+    exclude-caches: true
+    exclude-file: ~/.config/resticprofile/exclude.list
+    schedule: "*-*-* 15:00:00"
+    source:
+      - "~/documents"
+      - "~/pictures"
+      - "~/projects"
+      - "~/.config"
+  retention:
+    before-backup: false
+    after-backup: true
+    host: true
+    keep-daily: 6
+    keep-weekly: 3
+    keep-monthly: 3
+    tag: true
+    prune: false
+    keep-tag:
+      - do-not-delete
+  prune:
+    schedule: "*-*-* 17:00:00"
+

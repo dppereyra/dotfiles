@@ -1,0 +1,23 @@
+[colors.bright]
+black = "0x000000"
+blue = "0xbbdaff"
+cyan = "0x99ffff"
+green = "0xd1f1a9"
+magenta = "0xebbbff"
+red = "0xff9da4"
+white = "0xffffff"
+yellow = "0xffeead"
+
+[colors.normal]
+black = "0x000000"
+blue = "0xbbdaff"
+cyan = "0x99ffff"
+green = "0xd1f1a9"
+magenta = "0xebbbff"
+red = "0xff9da4"
+white = "0xffffff"
+yellow = "0xffeead"
+
+[colors.primary]
+background = "0x002451"
+foreground = "0xffffff"

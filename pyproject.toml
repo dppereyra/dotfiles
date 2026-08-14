@@ -1,0 +1,62 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools",
+    "setuptools-scm",
+    "wheel",
+]
+
+[project]
+name = "devspace"
+description = "Python Tool to setup personal developer workspaces"
+requires-python = ">=3.13.0"
+license = { file = "LICENSE" }
+authors = [
+  {name = "DPPereyra", "email" = "dppereyra@gmail.com"}
+]
+dynamic = ["version", "readme"]
+dependencies = [
+    "pydantic[email]~=2.12.0",
+    "click~=8.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "bandit~=1.8.6",
+    "flake8~=7.3.0",
+    "pytest~=8.4.2",
+    "radon~=6.0.1",
+    "vulture~=2.14",
+    "pytest-cov~=7.0.0",
+]
+
+[project.scripts]
+devspace = "devspace:main"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/devspace"]
+
+[tool.hatch.envs.default]
+type = "virtual"
+features = ["dev"]
+installer = "uv"
+
+[tool.hatch.envs.default.scripts]
+tests = "pytest --cov"
+linter = "flake8 src tests"
+complexity = [
+  "radon cc --total-average --no-assert src tests",
+  "radon mi --show src tests",
+  "radon hal src"
+]
+deadcode = "vulture --min-confidence 75 src"
+security = "bandit -r src"
+
+[tool.hatch.envs.local]
+inherit = ["default"]
+
+[[tool.hatch.envs.local.matrix]]
+python = ["3.13", "3.14", "3.15"]

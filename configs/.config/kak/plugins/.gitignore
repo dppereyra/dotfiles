@@ -1,0 +1,6 @@
+# Do nor save amy thing in this directory
+*
+*/
+# Except this file
+!.gitignore
+
