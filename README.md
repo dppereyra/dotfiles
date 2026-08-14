@@ -1,4 +1,4 @@
-# dotfiles
+# DPPereyra Dotfiles
 
 Personal dotfiles managed with [GNU Stow](https://www.gnu.org/software/stow/).
 
@@ -28,12 +28,14 @@ Each installer in `scripts/` is also safe to run standalone — that's the inten
 
 ## Stow packages
 
+A `.stowrc` at the repo root sets `--dir=src` by default, so run these from the repo root:
+
 ```bash
-stow --target=$HOME --dir=src configs          # dotfiles -> $HOME
-stow --target=$HOME/.config --dir=src scripts  # shell utility scripts -> ~/.config/scripts
+stow --target=$HOME configs          # dotfiles -> $HOME
+stow --target=$HOME/.config scripts  # shell utility scripts -> ~/.config/scripts
 ```
 
-Add `--simulate` to either command for a dry run, or replace the implicit stow action with `--delete` to remove the symlinks.
+Add `--simulate` to either command for a dry run, or replace the implicit stow action with `--delete` to remove the symlinks. (`bootstrap.sh` passes `--dir` explicitly instead of relying on `.stowrc`, since it doesn't depend on the caller's current directory.)
 
 ## Dependencies
 

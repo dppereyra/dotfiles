@@ -13,6 +13,7 @@ dotfiles/
 ├── CLAUDE.md
 ├── README.md
 ├── LICENSE                (root only — outside src/, so Stow never touches it)
+├── .stowrc                 (sets --dir=src as the default for manual `stow` invocations from the repo root)
 ├── bootstrap.sh            (personal-machine entrypoint: stow both packages, run scripts/install-*.sh)
 ├── scripts/                (root-level tool installers, install-<tool>.sh — NOT stowed;
 │                             usable standalone by Codespaces/DevPod/Ona, or via bootstrap.sh)
@@ -35,11 +36,11 @@ From the repo root, run the full bootstrap (stows both packages, then runs every
 ./bootstrap.sh
 ```
 
-Or stow only, without installing tools:
+Or stow only, without installing tools (a `.stowrc` at the repo root sets `--dir=src` by default):
 
 ```bash
-stow --target=$HOME --dir=src configs
-stow --target=$HOME/.config --dir=src scripts
+stow --target=$HOME configs
+stow --target=$HOME/.config scripts
 ```
 
 To simulate without making changes (dry run), add `--simulate`. To remove symlinks, use `--delete` instead of the default action.
