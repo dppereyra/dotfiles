@@ -12,7 +12,7 @@ cd dotfiles
 
 `bootstrap.sh` will:
 1. Confirm `stow` is installed.
-2. Refuse to proceed if any `~/.config/<tool>` target already exists as a real (non-symlink) directory — review and clear those first so Stow can create clean directory-level symlinks instead of folding into per-file ones.
+2. Refuse to proceed if any stow target already exists as a real (non-symlink) file or directory — review and clear those first so Stow can create clean symlinks instead of folding into per-file ones.
 3. `stow` both packages: `src/configs` → `$HOME`, `src/scripts` → `$HOME/.config` (so `~/.config/scripts` becomes one symlink).
 4. Run every installer in `scripts/` (asdf, pyenv, goenv, nodenv, rbenv, phpenv, zinit, opencode, claude, neovim, tmux plugin manager).
 
@@ -36,6 +36,19 @@ stow --target=$HOME/.config scripts  # shell utility scripts -> ~/.config/script
 ```
 
 Add `--simulate` to either command for a dry run, or replace the implicit stow action with `--delete` to remove the symlinks. (`bootstrap.sh` passes `--dir` explicitly instead of relying on `.stowrc`, since it doesn't depend on the caller's current directory.)
+
+## AI tooling config
+
+Claude Code and opencode config live in the `configs` package under `.claude/` and
+`.config/opencode/`. `~/.claude` and `~/.config/opencode` deliberately stay **real directories** —
+they hold session state and `node_modules` — so only six leaves get symlinked: `~/.claude/agents`,
+`~/.claude/skills`, `~/.claude/keybindings.json`, `~/.claude/statusline-command.sh`,
+`~/.config/opencode/opencode.jsonc` and `~/.config/opencode/plugins`.
+
+`~/.claude/settings.json` and `~/.claude/mcp.json` are **not** tracked: the first hardcodes absolute
+hook paths that only exist on one machine, the second can hold credentials. Set those up per machine.
+
+See [CLAUDE.md](CLAUDE.md) for the full rationale and current migration status.
 
 ## Dependencies
 

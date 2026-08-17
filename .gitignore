@@ -134,5 +134,9 @@ __marimo__/
 # OS Artifacts
 .DS_Store
 
-# Claude Code local session state
-.claude/
+# Claude Code local session state for THIS repo only.
+# Root-anchored so it does not swallow the stowed src/configs/.claude/ tree.
+/.claude/
+
+# VS Code Local History extension artefacts
+.history/
