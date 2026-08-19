@@ -10,7 +10,8 @@ fi
 
 echo "== Checking for pre-existing real (non-symlink) stow targets =="
 # Full target paths, because not everything stowed lives directly under ~/.config —
-# ~/.claude/* and ~/.config/opencode/* are leaves inside directories that must stay real.
+# ~/.claude/*, ~/.config/opencode/*, ~/.copilot/*, ~/.codex/*, and ~/.gemini/config/* are
+# leaves inside directories that must stay real (they hold live tool session state).
 STOWED_TARGETS=(
   "$HOME/.config/alacritty"
   "$HOME/.config/astronvim"
@@ -30,6 +31,10 @@ STOWED_TARGETS=(
   "$HOME/.claude/statusline-command.sh"
   "$HOME/.config/opencode/opencode.jsonc"
   "$HOME/.config/opencode/plugins"
+  "$HOME/.config/opencode/agents"
+  "$HOME/.copilot/agents"
+  "$HOME/.codex/agents"
+  "$HOME/.gemini/config/agents"
 )
 conflict_found=0
 for target in "${STOWED_TARGETS[@]}"; do
@@ -41,8 +46,8 @@ done
 if [[ "$conflict_found" -eq 1 ]]; then
   echo
   echo "Review the paths above, back up/remove anything that's not still needed, then re-run bootstrap.sh."
-  echo "Note: ~/.claude and ~/.config/opencode themselves must stay REAL directories — they hold"
-  echo "runtime state. Only the leaves listed above are stowed."
+  echo "Note: ~/.claude, ~/.config/opencode, ~/.copilot, ~/.codex, and ~/.gemini/config themselves"
+  echo "must stay REAL directories — they hold runtime state. Only the leaves listed above are stowed."
   exit 1
 fi
 

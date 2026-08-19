@@ -39,14 +39,29 @@ Add `--simulate` to either command for a dry run, or replace the implicit stow a
 
 ## AI tooling config
 
-Claude Code and opencode config live in the `configs` package under `.claude/` and
-`.config/opencode/`. `~/.claude` and `~/.config/opencode` deliberately stay **real directories** —
-they hold session state and `node_modules` — so only six leaves get symlinked: `~/.claude/agents`,
-`~/.claude/skills`, `~/.claude/keybindings.json`, `~/.claude/statusline-command.sh`,
-`~/.config/opencode/opencode.jsonc` and `~/.config/opencode/plugins`.
+Config for five AI coding tools lives in the `configs` package: Claude Code (`.claude/`), opencode
+(`.config/opencode/`), GitHub Copilot (`.copilot/`), OpenAI Codex (`.codex/`), and Google
+Antigravity (`.gemini/config/`). All five of `~/.claude`, `~/.config/opencode`, `~/.copilot`,
+`~/.codex`, and `~/.gemini/config` deliberately stay **real directories** — they hold session
+state, auth tokens, and (for opencode) `node_modules` — so only specific leaves get symlinked:
+`~/.claude/agents`, `~/.claude/skills`, `~/.claude/keybindings.json`,
+`~/.claude/statusline-command.sh`, `~/.config/opencode/opencode.jsonc`,
+`~/.config/opencode/plugins`, `~/.config/opencode/agents`, `~/.copilot/agents`,
+`~/.codex/agents`, and `~/.gemini/config/agents`.
+
+All five tools share the same underlying multi-agent fleet — a `mgr-product-owner`-led Trello
+workflow with owning leads, QA authors/reviewers, and an `mgr-recruiter` that can create new
+specialist agents — translated into each tool's own agent-definition format (Claude's `.md` with
+`model`/`color` frontmatter, opencode's `.md` with `mode`/`permission`, Copilot's `*.agent.md` with
+a `tools`/`agents` allowlist, Codex's `.toml` with `developer_instructions`, and Antigravity's `.md`
+with an H1 `# System Prompt` body). The prose (Scope, Standards, Delegation, Reporting) is shared;
+only the frontmatter shape differs per tool.
 
 `~/.claude/settings.json` and `~/.claude/mcp.json` are **not** tracked: the first hardcodes absolute
-hook paths that only exist on one machine, the second can hold credentials. Set those up per machine.
+hook paths that only exist on one machine, the second can hold credentials. The same applies to
+`~/.codex/config.toml` — it carries machine-specific MCP server paths, so only the `agents/`
+subdirectory is tracked; the `[agents]` block that enables Codex's multi-agent tools has to be added
+to `config.toml` by hand on each machine. Set these up per machine.
 
 See [CLAUDE.md](CLAUDE.md) for the full rationale and current migration status.
 
