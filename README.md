@@ -12,7 +12,7 @@ cd dotfiles
 
 `bootstrap.sh` will:
 1. Confirm `stow` is installed.
-2. Refuse to proceed if any `~/.config/<tool>` target already exists as a real (non-symlink) directory — review and clear those first so Stow can create clean directory-level symlinks instead of folding into per-file ones.
+2. Refuse to proceed if any stow target already exists as a real (non-symlink) file or directory — review and clear those first so Stow can create clean symlinks instead of folding into per-file ones.
 3. `stow` both packages: `src/configs` → `$HOME`, `src/scripts` → `$HOME/.config` (so `~/.config/scripts` becomes one symlink).
 4. Run every installer in `scripts/` (asdf, pyenv, goenv, nodenv, rbenv, phpenv, zinit, opencode, claude, neovim, tmux plugin manager).
 
@@ -36,6 +36,34 @@ stow --target=$HOME/.config scripts  # shell utility scripts -> ~/.config/script
 ```
 
 Add `--simulate` to either command for a dry run, or replace the implicit stow action with `--delete` to remove the symlinks. (`bootstrap.sh` passes `--dir` explicitly instead of relying on `.stowrc`, since it doesn't depend on the caller's current directory.)
+
+## AI tooling config
+
+Config for five AI coding tools lives in the `configs` package: Claude Code (`.claude/`), opencode
+(`.config/opencode/`), GitHub Copilot (`.copilot/`), OpenAI Codex (`.codex/`), and Google
+Antigravity (`.gemini/config/`). All five of `~/.claude`, `~/.config/opencode`, `~/.copilot`,
+`~/.codex`, and `~/.gemini/config` deliberately stay **real directories** — they hold session
+state, auth tokens, and (for opencode) `node_modules` — so only specific leaves get symlinked:
+`~/.claude/agents`, `~/.claude/skills`, `~/.claude/keybindings.json`,
+`~/.claude/statusline-command.sh`, `~/.config/opencode/opencode.jsonc`,
+`~/.config/opencode/plugins`, `~/.config/opencode/agents`, `~/.copilot/agents`,
+`~/.codex/agents`, and `~/.gemini/config/agents`.
+
+All five tools share the same underlying multi-agent fleet — a `mgr-product-owner`-led Trello
+workflow with owning leads, QA authors/reviewers, and an `mgr-recruiter` that can create new
+specialist agents — translated into each tool's own agent-definition format (Claude's `.md` with
+`model`/`color` frontmatter, opencode's `.md` with `mode`/`permission`, Copilot's `*.agent.md` with
+a `tools`/`agents` allowlist, Codex's `.toml` with `developer_instructions`, and Antigravity's `.md`
+with an H1 `# System Prompt` body). The prose (Scope, Standards, Delegation, Reporting) is shared;
+only the frontmatter shape differs per tool.
+
+`~/.claude/settings.json` and `~/.claude/mcp.json` are **not** tracked: the first hardcodes absolute
+hook paths that only exist on one machine, the second can hold credentials. The same applies to
+`~/.codex/config.toml` — it carries machine-specific MCP server paths, so only the `agents/`
+subdirectory is tracked; the `[agents]` block that enables Codex's multi-agent tools has to be added
+to `config.toml` by hand on each machine. Set these up per machine.
+
+See [CLAUDE.md](CLAUDE.md) for the full rationale and current migration status.
 
 ## Dependencies
 

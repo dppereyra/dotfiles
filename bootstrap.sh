@@ -8,19 +8,46 @@ if ! command -v stow &>/dev/null; then
   exit 1
 fi
 
-echo "== Checking for pre-existing real (non-symlink) config directories =="
-STOWED_CONFIG_DIRS=(alacritty astronvim bat fish kak mopidy neofetch qutebrowser resticprofile systemd zellij station)
+echo "== Checking for pre-existing real (non-symlink) stow targets =="
+# Full target paths, because not everything stowed lives directly under ~/.config —
+# ~/.claude/*, ~/.config/opencode/*, ~/.copilot/*, ~/.codex/*, and ~/.gemini/config/* are
+# leaves inside directories that must stay real (they hold live tool session state).
+STOWED_TARGETS=(
+  "$HOME/.config/alacritty"
+  "$HOME/.config/astronvim"
+  "$HOME/.config/bat"
+  "$HOME/.config/fish"
+  "$HOME/.config/kak"
+  "$HOME/.config/mopidy"
+  "$HOME/.config/neofetch"
+  "$HOME/.config/qutebrowser"
+  "$HOME/.config/resticprofile"
+  "$HOME/.config/systemd"
+  "$HOME/.config/zellij"
+  "$HOME/.config/station"
+  "$HOME/.claude/agents"
+  "$HOME/.claude/skills"
+  "$HOME/.claude/keybindings.json"
+  "$HOME/.claude/statusline-command.sh"
+  "$HOME/.config/opencode/opencode.jsonc"
+  "$HOME/.config/opencode/plugins"
+  "$HOME/.config/opencode/agents"
+  "$HOME/.copilot/agents"
+  "$HOME/.codex/agents"
+  "$HOME/.gemini/config/agents"
+)
 conflict_found=0
-for dir in "${STOWED_CONFIG_DIRS[@]}"; do
-  target="$HOME/.config/$dir"
+for target in "${STOWED_TARGETS[@]}"; do
   if [[ -e "$target" && ! -L "$target" ]]; then
-    echo "  ! $target already exists as a real directory — stow will fold into per-file symlinks instead of one clean directory symlink."
+    echo "  ! $target already exists as a real file or directory — stow will fold into per-file symlinks instead of one clean symlink."
     conflict_found=1
   fi
 done
 if [[ "$conflict_found" -eq 1 ]]; then
   echo
-  echo "Review the directories above, back up/remove anything that's not still needed, then re-run bootstrap.sh."
+  echo "Review the paths above, back up/remove anything that's not still needed, then re-run bootstrap.sh."
+  echo "Note: ~/.claude, ~/.config/opencode, ~/.copilot, ~/.codex, and ~/.gemini/config themselves"
+  echo "must stay REAL directories — they hold runtime state. Only the leaves listed above are stowed."
   exit 1
 fi
 
