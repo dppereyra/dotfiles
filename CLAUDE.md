@@ -104,7 +104,7 @@ five directories; only the frontmatter shape differs per tool's own convention:
 | Tool | Frontmatter shape | Notes |
 |---|---|---|
 | Claude Code | `name`, `description`, `model: sonnet`, `color` | canonical source; edit here first |
-| opencode | `description`, `mode` (`primary` for `mgr-product-owner`, else `subagent`), `color` | filename *is* the agent name — no `name:` field. Current convention is plural `agents/`; singular `agent/` still works but is legacy. |
+| opencode | `description`, `mode` (`primary` for `mgr-product-owner`, else `subagent`), `color` | filename *is* the agent name — no `name:` field. `color` must be a quoted `"#rrggbb"` hex string or one of `primary`/`secondary`/`accent`/`success`/`warning`/`error`/`info` — Claude Code's bare colour names (`cyan`, `green`, …) fail config validation and stop opencode from starting at all. Quote the hex, or YAML reads `#` as a comment. Current convention is plural `agents/`; singular `agent/` still works but is legacy. |
 | GitHub Copilot | `name`, `description`, `tools`, `agents` (delegation allowlist), `user-invocable`, `disable-model-invocation` | file suffix is `*.agent.md`, not `*.md`. The `agents:` allowlist is derived from each source file's own `## Delegation` table. |
 | OpenAI Codex | `name`, `description`, `developer_instructions`, `sandbox_mode` | TOML, not Markdown+YAML. Requires the `[agents]` block in `config.toml` (see above, not tracked). |
 | Google Antigravity | `name`, `description`, `subagent`, `mainAgent` (`true` only for `mgr-product-owner`), `model`, `commandExecutionPolicy` | body is prefixed with an `# System Prompt` H1, per Antigravity's convention. |
