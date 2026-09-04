@@ -167,4 +167,14 @@ Two different things, both plural "scripts", easy to confuse:
 
 ## Real secrets
 
-`station/runcom/s97_work_config.sample.zsh` and `s98_secrets.sample.zsh` are templates. The real, filled-in `s97_work_config.zsh` / `s98_secrets.zsh` are intentionally untracked (gitignored via `station/global_gitignore`) — never commit real values there.
+`station/runcom/s97_work_config.sample.zsh` and `s98_secrets.sample.zsh` are templates. The real,
+filled-in `s97_work_config.zsh` / `s98_secrets.zsh` are intentionally untracked — never commit real
+values there.
+
+What keeps them out is **this repo's own `.gitignore`**, which lists both paths explicitly. That is
+the right mechanism: because `~/.config/station` is a symlink into `src/configs/.config/station`,
+those files genuinely live in this working tree, so ignoring them is this repo's job.
+
+`station/global_gitignore` is *not* what protects them, despite what this file used to say. It is
+the global `core.excludesfile`, and its purpose is to keep personal artefacts out of **other**
+repos — work and client projects — not to manage this one's contents. Don't add these paths there.

@@ -155,6 +155,9 @@ __marimo__/
 /src/configs/.config/station/zinit/
 
 # Real, filled-in secrets. The *.sample.zsh templates ARE tracked; these are not.
-# Do not rely on the global excludesfile for this — it has no matching pattern.
+# This is the correct place for them: ~/.config/station symlinks into this tree, so
+# these files really do live here. station/global_gitignore is the global
+# core.excludesfile for keeping personal artefacts out of OTHER (work/client)
+# repos — it is not the mechanism for this repo's own contents.
 /src/configs/.config/station/runcom/s97_work_config.zsh
 /src/configs/.config/station/runcom/s98_secrets.zsh
