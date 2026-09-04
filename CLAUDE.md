@@ -137,12 +137,23 @@ have an equivalent in-session agent-creation flow to worry about yet.
 
 ## Migration status
 
-The Stow layout is **not yet applied on the primary machine**. `~/.gitconfig`, `~/.zshrc` and all 11
-`~/.config/*` package dirs are still real files, `~/.config/station` and `~/.config/scripts` don't
-exist, `~/station` and `~/.station` are both still present, and `~/.gitconfig` still points
-`excludesfile` at the pre-migration `~/station/global_gitignore`. Running `./bootstrap.sh` today
-exits 1 at the conflict check, before touching anything — clearing those targets is the remaining
-work.
+The Stow layout **is applied on the primary machine**. All 22 entries in `bootstrap.sh`'s
+`STOWED_TARGETS` are symlinks into this repo, the conflict check passes, and `./bootstrap.sh`
+runs to completion (exit 0). `~/.station` is gone and `excludesfile` points at
+`~/.config/station/global_gitignore`.
+
+Remaining cleanup:
+- `~/station` still exists as a real directory; its content now lives at `~/.config/station`.
+  Verify nothing unique is left there, then remove it.
+- Because `~/.config/station` is a symlink *into this repo*, everything the installers put under
+  `$STATION_HOME` (`envs/`, `npm/`, `zinit/`, `sdk/`, …) lands in this working tree. Those paths
+  are gitignored, but they mean the repo carries several hundred MB of installed toolchain that
+  `git status` no longer shows. Keep the ignore list in `.gitignore` in sync with
+  `scripts/install-paths.sh`.
+- Tools that append to stowed files write into the repo: `gh auth login` adds a `[credential]`
+  block to `src/configs/.gitconfig`, and opencode's own installer appends a `PATH` line to
+  `src/configs/.zshrc`. Both show up as unexpected `git status` modifications after running
+  those tools — decide per-machine whether to keep them.
 
 ## `scripts/` vs `src/scripts/`
 
