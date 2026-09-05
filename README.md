@@ -57,6 +57,35 @@ a `tools`/`agents` allowlist, Codex's `.toml` with `developer_instructions`, and
 with an H1 `# System Prompt` body). The prose (Scope, Standards, Delegation, Reporting) is shared;
 only the frontmatter shape differs per tool.
 
+### Editing agents: one source, five renders
+
+The five `agents/` directories under `src/configs/` are **generated output — never edit them by
+hand.** The source of truth is:
+
+- `src/agents/<name>.md` — one file per agent: frontmatter (`role`, `color`, `delegates`,
+  `description`) plus the agent's own prose, with `{{STANDARDS}}` and `{{CLOSING}}` markers where
+  the shared blocks belong.
+- `src/agents/_standards/` — the blocks every agent shares, written once: the operating standards
+  and reporting format for each `role` (`implementer`, `reviewer`), and the Trello
+  `card-write-back.md` protocol used by all of them.
+
+Edit a source file, then regenerate:
+
+```bash
+python3 scripts/build-agents.py            # rewrite all five tool trees
+python3 scripts/build-agents.py --check    # verify output is current (exit 1 if stale)
+```
+
+An agent takes the shared block for its `role` unless it defines that section inline itself. The
+four advisory agents (`mgr-product-owner`, `mgr-recruiter`, `ops-architect`, `ops-automation`)
+carry their own standards and reporting inline, because those are genuinely role-specific rather
+than duplicated.
+
+This exists because the fleet was previously 330 hand-maintained files (66 agents × 5 tools) with
+no generator: over half of each file was copy-pasted boilerplate, which had already drifted into
+six competing variants and left the tracked copies weeks behind the live ones. Changing a shared
+rule is now a one-file edit.
+
 `~/.claude/settings.json` and `~/.claude/mcp.json` are **not** tracked: the first hardcodes absolute
 hook paths that only exist on one machine, the second can hold credentials. The same applies to
 `~/.codex/config.toml` — it carries machine-specific MCP server paths, so only the `agents/`
