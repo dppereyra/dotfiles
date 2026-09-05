@@ -154,6 +154,9 @@ __marimo__/
 /src/configs/.config/station/sdk/
 /src/configs/.config/station/zinit/
 
+# Shell history: runtime state, and this repo is public.
+/src/configs/.config/station/zsh_history
+
 # Real, filled-in secrets. The *.sample.zsh templates ARE tracked; these are not.
 # This is the correct place for them: ~/.config/station symlinks into this tree, so
 # these files really do live here. station/global_gitignore is the global
@@ -161,3 +164,17 @@ __marimo__/
 # repos — it is not the mechanism for this repo's own contents.
 /src/configs/.config/station/runcom/s97_work_config.zsh
 /src/configs/.config/station/runcom/s98_secrets.zsh
+
+# Defence in depth. The two rules above name the files we know about; these
+# catch any other s97_*/s98_* variant (backups, .local, .work) that a future
+# edit might leave behind. Only the *.sample.zsh templates stay tracked.
+/src/configs/.config/station/runcom/s97_*
+/src/configs/.config/station/runcom/s98_*
+!/src/configs/.config/station/runcom/s97_*.sample.zsh
+!/src/configs/.config/station/runcom/s98_*.sample.zsh
+
+# Everything under station/secrets/ is environment-specific and never tracked.
+# secrets/.gitignore enforces this from inside the directory too; this rule is
+# the backstop for if that file is ever deleted.
+/src/configs/.config/station/secrets/*
+!/src/configs/.config/station/secrets/.gitignore
