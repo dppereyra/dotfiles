@@ -140,3 +140,24 @@ __marimo__/
 
 # VS Code Local History extension artefacts
 .history/
+
+# --- Stowed-tree runtime state -------------------------------------------
+# ~/.config/station is a symlink INTO this repo, so anything the installers or
+# tools create under $STATION_HOME lands in this working tree. None of it is
+# config: it is installed toolchains, caches and downloaded binaries.
+/src/configs/.config/station/ansible/roles/
+/src/configs/.config/station/appimages/
+/src/configs/.config/station/bin/
+/src/configs/.config/station/envs/
+/src/configs/.config/station/npm/
+/src/configs/.config/station/pnpm/
+/src/configs/.config/station/sdk/
+/src/configs/.config/station/zinit/
+
+# Real, filled-in secrets. The *.sample.zsh templates ARE tracked; these are not.
+# This is the correct place for them: ~/.config/station symlinks into this tree, so
+# these files really do live here. station/global_gitignore is the global
+# core.excludesfile for keeping personal artefacts out of OTHER (work/client)
+# repos — it is not the mechanism for this repo's own contents.
+/src/configs/.config/station/runcom/s97_work_config.zsh
+/src/configs/.config/station/runcom/s98_secrets.zsh
