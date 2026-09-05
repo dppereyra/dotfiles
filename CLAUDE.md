@@ -92,6 +92,12 @@ pre-flight check catches them too.
   `command-history-state.json`, `session-state/`.
 - `.history/` anywhere — VS Code Local History extension artefacts. Ignored by both
   `station/global_gitignore` and this repo's own `.gitignore`.
+- **qutebrowser runtime state.** `~/.config/qutebrowser` is a symlink into this tree, so a
+  browser writes into the repo as you use it. Only the hand-maintained config is tracked
+  (`config.py`, `autoconfig.yml`, `quickmarks`, `bookmarks/`); `.gitignore` blocks cookies,
+  `history.sqlite*`, `sessions/`, `webengine/`, `cmd-history`, `greasemonkey/` and any stray
+  `*.sqlite`/`*.db`/`*.log`, since those carry session tokens and browsing history. Note that
+  `quickmarks` and `bookmarks/urls` **are** tracked — don't bookmark a URL with a token in it.
 
 **All five tools now run the same agent fleet.** It's built around `mgr-product-owner` (the one
 agent meant to be talked to directly) coordinating a Trello-card pipeline — owning leads,
@@ -155,16 +161,27 @@ points at `~/.config/station/global_gitignore`. Only the two `stow` calls were r
 installer phase of `bootstrap.sh` was not, since the toolchain was moved across rather than
 rebuilt.
 
+**`~/.station` (the bare repo) is gone.** Nothing referenced it: the `mystation` aliases were
+removed from `s08_aliases.zsh` and the `includeIf gitdir:~/.station` block from `.gitconfig`.
+`$HOME` is no longer a git work-tree.
+
+### Machine-local directories outside the repo
+
+Two directories deliberately live **outside** this repo, created empty by `bootstrap.sh` and
+populated by hand per machine. `~/.config/station` is a symlink into this working tree, so
+anything under it is one `git add -f` away from a public repo — keys and client identity must
+never sit there.
+
+| Path | Holds |
+|---|---|
+| `~/.config/secrets` | GPG/age keys, `restic_repo_secret`, PEMs. `RESTIC_PASSWORD_FILE` in `s98_secrets.zsh` points here. |
+| `~/.config/work` | `work.gitconfig`, `work_gitignore`, and client fragments. `.gitconfig`'s `includeIf gitdir:~/projects/work/` points at `~/.config/work/work.gitconfig`. |
+
 Remaining cleanup:
-- **`~/.station` (the bare repo) still exists** and is the thing being decommissioned. Nothing
-  references it any more: the `mystation` aliases are gone from `s08_aliases.zsh` and the
-  `includeIf gitdir:~/.station` block is gone from `.gitconfig`.
-- `~/station` is down to under 600KB. What is left there is deliberate, not pending: `secrets/`
-  (copied to `~/.config/station/secrets/`, which is gitignored), `containers/` (its own git repo,
-  and its compose files hold plaintext secrets), `3cloud.gitconfig` and `cla.gitconfig`
-  (unreferenced, and they carry client names and work emails — this repo is public),
-  `scripts/setup/` (superseded by `scripts/install-*.sh`), and `runcom/` (migrated).
-  Everything else was moved or is byte-identical to what the repo already tracks.
+- `~/station` is down to under 600KB and what is left is deliberate, not pending: `containers/`
+  (its own git repo, and its compose files hold plaintext secrets — move it to `~/projects/`
+  rather than delete), `scripts/setup/` (superseded by `scripts/install-*.sh`), and copies of
+  what already moved to `~/.config/secrets` and `~/.config/work`.
 - `s97_work_config.zsh` and `s98_secrets.zsh` are **auto-created from the `.sample.zsh`
   templates** by `s03_variables.zsh` when missing. That means a fresh machine gets empty
   placeholders, not the real values — copy the real files across by hand, or CLI tools that

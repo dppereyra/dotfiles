@@ -173,8 +173,36 @@ __marimo__/
 !/src/configs/.config/station/runcom/s97_*.sample.zsh
 !/src/configs/.config/station/runcom/s98_*.sample.zsh
 
-# Everything under station/secrets/ is environment-specific and never tracked.
-# secrets/.gitignore enforces this from inside the directory too; this rule is
-# the backstop for if that file is ever deleted.
-/src/configs/.config/station/secrets/*
-!/src/configs/.config/station/secrets/.gitignore
+# Keys and work/client identity now live at ~/.config/secrets and ~/.config/work,
+# which are deliberately OUTSIDE this repo (bootstrap.sh creates them empty) --
+# ~/.config/station is a symlink into this working tree, so nothing sensitive
+# should ever sit under it again. These rules are the backstop in case anything
+# recreates the old locations.
+/src/configs/.config/station/secrets/
+/src/configs/.config/station/work/
+/src/configs/.config/station/*.gitconfig
+!/src/configs/.config/station/personal.gitconfig
+!/src/configs/.config/station/station.gitconfig
+
+# --- qutebrowser: browser state must never reach a public repo -------------
+# ~/.config/qutebrowser is a symlink into this tree, so anything the browser
+# writes at runtime lands here. Only the hand-maintained config is tracked
+# (config.py, autoconfig.yml, quickmarks, bookmarks/); everything below is
+# session state that can carry cookies, auth tokens, or browsing history.
+/src/configs/.config/qutebrowser/cookies*
+/src/configs/.config/qutebrowser/history.sqlite*
+/src/configs/.config/qutebrowser/state
+/src/configs/.config/qutebrowser/cmd-history
+/src/configs/.config/qutebrowser/sessions/
+/src/configs/.config/qutebrowser/webengine/
+/src/configs/.config/qutebrowser/cache/
+/src/configs/.config/qutebrowser/data/
+/src/configs/.config/qutebrowser/qtwebengine_dictionaries/
+/src/configs/.config/qutebrowser/blocked-hosts
+/src/configs/.config/qutebrowser/greasemonkey/
+# Belt and braces: any DB/journal/log the browser drops in its basedir.
+/src/configs/.config/qutebrowser/**/*.sqlite
+/src/configs/.config/qutebrowser/**/*.sqlite-wal
+/src/configs/.config/qutebrowser/**/*.sqlite-shm
+/src/configs/.config/qutebrowser/**/*.db
+/src/configs/.config/qutebrowser/**/*.log

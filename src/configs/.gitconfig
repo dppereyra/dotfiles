@@ -33,7 +33,7 @@ conflictstyle = diff3
 colorMoved = default
 
 [includeIf "gitdir:~/projects/work/"]
-path = ~/.config/station/work.gitconfig
+path = ~/.config/work/work.gitconfig
 
 [includeIf "gitdir:~/projects/personal/"]
 path = ~/.config/station/personal.gitconfig

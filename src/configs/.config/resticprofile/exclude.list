@@ -5,3 +5,14 @@
 projects/opensource
 projects/go
 
+
+# Installed toolchain under $STATION_HOME. Regenerable by scripts/install-*.sh,
+# and it only became a backup candidate when ~/station moved into ~/projects
+# (which is a backup source) as part of the Stow migration.
+projects/personal/dotfiles/src/configs/.config/station/envs
+projects/personal/dotfiles/src/configs/.config/station/sdk
+projects/personal/dotfiles/src/configs/.config/station/zinit
+projects/personal/dotfiles/src/configs/.config/station/npm
+projects/personal/dotfiles/src/configs/.config/station/pnpm
+projects/personal/dotfiles/src/configs/.config/station/bin
+projects/personal/dotfiles/src/configs/.config/station/appimages
