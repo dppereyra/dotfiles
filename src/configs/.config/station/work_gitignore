@@ -1,7 +1,9 @@
 # Editor Artefacts
 .vscode/
 .idea/
-.history
+.history/
+.zed/
+
 
 # Env Artefacts
 .*-version
@@ -38,5 +40,3 @@ codealike.json
 # Local Taskfile
 Taskfile.yml
 
-
-**/.claude/settings.local.json

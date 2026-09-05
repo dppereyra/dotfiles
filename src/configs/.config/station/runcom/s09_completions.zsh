@@ -73,3 +73,9 @@ if [[ -x $(which colima) ]]; then
   echo "Loading colima completions ..."
   source <(colima completion zsh)
 fi
+
+echo "Checking for worktrunk cli ..."
+if [[ -x $(which wt) ]]; then
+  echo "Loading worktrunk completions ..."
+  source <(wt config shell init zsh)
+fi
