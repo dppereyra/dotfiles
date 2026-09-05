@@ -115,25 +115,46 @@ these directories without translating the frontmatter will not work.
 Once symlinked, `~/.claude/skills` serves both Claude Code and opencode — opencode reads that
 path too.
 
-### Temporary: agents are copies, not symlinks
+### Agents are generated — edit `src/agents/`, never `src/configs/*/agents/`
 
-Until the migration below completes, every `agents/` directory under `src/configs/` is a **copy**
-of its live `~/...` counterpart, and each pair will drift as agents are edited. Refresh with:
+All five `agents/` directories under `src/configs/` are **build output**. The source of truth is
+`src/agents/`, and `scripts/build-agents.py` renders every tool's format from it:
 
 ```bash
-rsync -a --delete --exclude='.history' ~/.claude/agents/          src/configs/.claude/agents/
-rsync -a --delete                      ~/.config/opencode/agents/ src/configs/.config/opencode/agents/
-rsync -a --delete                      ~/.copilot/agents/         src/configs/.copilot/agents/
-rsync -a --delete                      ~/.codex/agents/           src/configs/.codex/agents/
-rsync -a --delete                      ~/.gemini/config/agents/   src/configs/.gemini/config/agents/
+python3 scripts/build-agents.py            # rewrite all five tool trees
+python3 scripts/build-agents.py --check    # verify committed output is current (exit 1 if stale)
 ```
 
-Claude Code is the canonical source for the fleet's content — edit agents there, then re-derive
-the other four (frontmatter differs enough per tool that this isn't a plain copy; see the table
-above). After stowing, the copy-drift problem stops mattering for Claude Code and opencode: they
-become the same files, and an agent created from a Claude Code `/agents` session writes straight
-into the repo working tree and shows up in `git status`. Copilot, Codex, and Antigravity don't
-have an equivalent in-session agent-creation flow to worry about yet.
+- `src/agents/<name>.md` — one file per agent: frontmatter (`role`, `color`, `delegates`,
+  `description`) and the agent's own prose, with `{{STANDARDS}}` and `{{CLOSING}}` markers where
+  the shared blocks go.
+- `src/agents/_standards/` — the shared blocks, written once: per-`role` operating standards and
+  reporting format (`implementer`, `reviewer`) plus the Trello `card-write-back.md` protocol.
+
+An agent inherits the block for its `role` unless it defines that section inline itself. The four
+advisory agents (`mgr-product-owner`, `mgr-recruiter`, `ops-architect`, `ops-automation`) carry
+their own standards and reporting inline because those are genuinely role-specific, and the
+generator leaves them alone.
+
+Do **not** rsync the live `~/...` directories back into `src/configs/` — that would overwrite
+generated files with hand-edits and silently break the single-source model. Edit `src/agents/`,
+regenerate, then copy out (or stow, once the migration below completes).
+
+### Temporary: agents are copies, not symlinks
+
+Until the Stow migration below completes, the five live `~/...` agent directories are **copies**
+of the generated output rather than symlinks, so they must be refreshed after a rebuild:
+
+```bash
+cp src/configs/.claude/agents/*.md          ~/.claude/agents/
+cp src/configs/.config/opencode/agents/*.md ~/.config/opencode/agents/
+cp src/configs/.copilot/agents/*.md         ~/.copilot/agents/
+cp src/configs/.codex/agents/*.toml         ~/.codex/agents/
+cp src/configs/.gemini/config/agents/*.md   ~/.gemini/config/agents/
+```
+
+Once stowed, these become symlinks into the repo and this step disappears — a rebuild is
+immediately live, and drift becomes structurally impossible.
 
 ## Migration status
 
