@@ -140,32 +140,35 @@ Do **not** rsync the live `~/...` directories back into `src/configs/` — that 
 generated files with hand-edits and silently break the single-source model. Edit `src/agents/`,
 regenerate, then copy out (or stow, once the migration below completes).
 
-### Temporary: agents are copies, not symlinks
+### Agents are live via Stow — no copy step
 
-Until the Stow migration below completes, the five live `~/...` agent directories are **copies**
-of the generated output rather than symlinks, so they must be refreshed after a rebuild:
-
-```bash
-cp src/configs/.claude/agents/*.md          ~/.claude/agents/
-cp src/configs/.config/opencode/agents/*.md ~/.config/opencode/agents/
-cp src/configs/.copilot/agents/*.md         ~/.copilot/agents/
-cp src/configs/.codex/agents/*.toml         ~/.codex/agents/
-cp src/configs/.gemini/config/agents/*.md   ~/.gemini/config/agents/
-```
-
-Once stowed, these become symlinks into the repo and this step disappears — a rebuild is
-immediately live, and drift becomes structurally impossible.
+All five live `~/...` agent directories are now symlinks into this repo, so
+`scripts/build-agents.py` writes straight through to what the tools actually read. There is no
+refresh step, and the copy-drift that used to leave the tracked trees weeks behind the live ones
+is now structurally impossible.
 
 ## Migration status
 
 The Stow layout **is applied on the primary machine**. All 22 entries in `bootstrap.sh`'s
-`STOWED_TARGETS` are symlinks into this repo, the conflict check passes, and `./bootstrap.sh`
-runs to completion (exit 0). `~/.station` is gone and `excludesfile` points at
-`~/.config/station/global_gitignore`.
+`STOWED_TARGETS` are symlinks into this repo, `~/.config/station` exists, and `excludesfile`
+points at `~/.config/station/global_gitignore`. Only the two `stow` calls were run — the
+installer phase of `bootstrap.sh` was not, since the toolchain was moved across rather than
+rebuilt.
 
 Remaining cleanup:
-- `~/station` still exists as a real directory; its content now lives at `~/.config/station`.
-  Verify nothing unique is left there, then remove it.
+- **`~/.station` (the bare repo) still exists** and is the thing being decommissioned. Nothing
+  references it any more: the `mystation` aliases are gone from `s08_aliases.zsh` and the
+  `includeIf gitdir:~/.station` block is gone from `.gitconfig`.
+- `~/station` is down to under 600KB. What is left there is deliberate, not pending: `secrets/`
+  (copied to `~/.config/station/secrets/`, which is gitignored), `containers/` (its own git repo,
+  and its compose files hold plaintext secrets), `3cloud.gitconfig` and `cla.gitconfig`
+  (unreferenced, and they carry client names and work emails — this repo is public),
+  `scripts/setup/` (superseded by `scripts/install-*.sh`), and `runcom/` (migrated).
+  Everything else was moved or is byte-identical to what the repo already tracks.
+- `s97_work_config.zsh` and `s98_secrets.zsh` are **auto-created from the `.sample.zsh`
+  templates** by `s03_variables.zsh` when missing. That means a fresh machine gets empty
+  placeholders, not the real values — copy the real files across by hand, or CLI tools that
+  read those env vars will silently break.
 - Because `~/.config/station` is a symlink *into this repo*, everything the installers put under
   `$STATION_HOME` (`envs/`, `npm/`, `zinit/`, `sdk/`, …) lands in this working tree. Those paths
   are gitignored, but they mean the repo carries several hundred MB of installed toolchain that
@@ -180,7 +183,13 @@ Remaining cleanup:
 
 Two different things, both plural "scripts", easy to confuse:
 - **`scripts/`** (root) — one-shot tool installers (`install-<tool>.sh`). Not stowed. Meant to be run standalone in ephemeral cloud dev environments as well as by `bootstrap.sh`.
-- **`src/scripts/`** — everyday shell utilities (not installers), stowed to `~/.config/scripts` and put on `PATH` by `station/runcom/s04_paths.zsh`.
+- **`src/scripts/`** — the Stow *package*; everyday shell utilities (not installers), stowed to `~/.config/scripts` and put on `PATH` by `station/runcom/s04_paths.zsh`.
+
+The package deliberately nests one level — the files live in **`src/scripts/scripts/`**, not
+`src/scripts/`. Stow links a package's *contents* into the target, so a flat `src/scripts/` would
+scatter `clean-all-py`, `download-common-images` and `git/` loose into `~/.config/`. Nesting makes
+the package contain a `scripts/` directory, which is what produces the single `~/.config/scripts`
+symlink. Add new utilities to `src/scripts/scripts/`.
 
 ## Dependencies
 
