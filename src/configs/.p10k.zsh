@@ -34,6 +34,7 @@
     # =========================[ Line #1 ]=========================
     # os_icon                 # os identifier
     dir                     # current directory
+    gh_account              # active gh (GitHub CLI) account, in git repos only
     vcs                     # git status
     # =========================[ Line #2 ]=========================
     newline                 # \n
@@ -1672,6 +1673,42 @@
   # typeset -g POWERLEVEL9K_TIME_VISUAL_IDENTIFIER_EXPANSION='⭐'
   # Custom prefix.
   typeset -g POWERLEVEL9K_TIME_PREFIX='%250Fat '
+
+  ##########################[ gh_account: active GitHub CLI account ]###########################
+  # Which `gh` account is currently selected. `gh` can have several accounts authenticated at
+  # once and the active one is global state, so it is easy to act on a repo as the wrong
+  # identity. Shown only inside a git repository, next to the vcs segment, so the left prompt
+  # reads path -> gh account -> git repo.
+  typeset -g POWERLEVEL9K_GH_ACCOUNT_FOREGROUND=180
+  # Custom icon.
+  # typeset -g POWERLEVEL9K_GH_ACCOUNT_VISUAL_IDENTIFIER_EXPANSION='⭐'
+
+  function prompt_gh_account() {
+    emulate -L zsh -o extended_glob
+
+    # Only when the vcs segment has something to show. `.git` is a file, not a directory, in
+    # worktrees and submodules, so test for either.
+    local dir=$PWD
+    while [[ $dir == /?* && ! -e $dir/.git ]]; do dir=${dir:h}; done
+    [[ -e $dir/.git ]] || return
+
+    # Read gh's own config rather than shelling out to `gh` — that would add roughly 100ms to
+    # every prompt. The active account is the `user:` key of the host block.
+    local hosts=${GH_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/gh}/hosts.yml
+    [[ -r $hosts ]] || return
+
+    local want=${GH_HOST:-github.com} host= account= line
+    for line in ${(f)"$(<$hosts)"}; do
+      if [[ $line == [^[:space:]]* ]]; then
+        host=${line%%:*}
+      elif [[ $host == $want && $line == (#b)[[:space:]]##user:[[:space:]]##(*) ]]; then
+        account=${match[1]}
+      fi
+    done
+    [[ -n $account ]] || return
+
+    p10k segment -f 180 -i '' -t ${account//\%/%%}
+  }
 
   # Example of a user-defined prompt segment. Function prompt_example will be called on every
   # prompt if `example` prompt segment is added to POWERLEVEL9K_LEFT_PROMPT_ELEMENTS or
