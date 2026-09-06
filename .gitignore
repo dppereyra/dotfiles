@@ -151,7 +151,6 @@ __marimo__/
 /src/configs/.config/station/envs/
 /src/configs/.config/station/npm/
 /src/configs/.config/station/pnpm/
-/src/configs/.config/station/sdk/
 /src/configs/.config/station/zinit/
 
 # Shell history: runtime state, and this repo is public.
