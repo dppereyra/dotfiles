@@ -28,7 +28,7 @@ dotfiles/
     │   │   └── config/
     │   │       └── agents/    (Google Antigravity custom subagents, *.md)
     │   └── .config/
-    │       ├── alacritty/ astronvim/ bat/ fish/ kak/ mopidy/ neofetch/ qutebrowser/
+    │       ├── alacritty/ bat/ fish/ kak/ mopidy/ neofetch/ qutebrowser/
     │       ├── resticprofile/ systemd/ zellij/
     │       ├── opencode/      (opencode.jsonc, plugins/, agents/)
     │       └── station/       (runcom/, gitconfig fragments, global_gitignore, restic_ignore)
@@ -137,7 +137,7 @@ have an equivalent in-session agent-creation flow to worry about yet.
 
 ## Migration status
 
-The Stow layout **is applied on the primary machine**. All 22 entries in `bootstrap.sh`'s
+The Stow layout **is applied on the primary machine**. All 21 entries in `bootstrap.sh`'s
 `STOWED_TARGETS` are symlinks into this repo, the conflict check passes, and `./bootstrap.sh`
 runs to completion (exit 0). `~/.station` is gone and `excludesfile` points at
 `~/.config/station/global_gitignore`.

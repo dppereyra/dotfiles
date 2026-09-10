@@ -7,7 +7,6 @@
 # leaves inside directories that must stay real (they hold live tool session state).
 STOWED_TARGETS=(
   "$HOME/.config/alacritty"
-  "$HOME/.config/astronvim"
   "$HOME/.config/bat"
   "$HOME/.config/fish"
   "$HOME/.config/kak"
