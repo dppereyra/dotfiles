@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
+#
+# Personal-machine entrypoint. For ephemeral environments (DevPod, Codespaces,
+# Gitpod/Ona) use install.sh instead — it installs its own prerequisites and
+# backs conflicting files out of the way rather than stopping.
+
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/lib/stow.sh
+source "$DOTFILES_DIR/scripts/lib/stow.sh"
 
 if ! command -v stow &>/dev/null; then
   echo "GNU Stow is required. Install it first (e.g. 'brew install stow' or your distro's package)." >&2
@@ -9,41 +16,7 @@ if ! command -v stow &>/dev/null; then
 fi
 
 echo "== Checking for pre-existing real (non-symlink) stow targets =="
-# Full target paths, because not everything stowed lives directly under ~/.config —
-# ~/.claude/*, ~/.config/opencode/*, ~/.copilot/*, ~/.codex/*, and ~/.gemini/config/* are
-# leaves inside directories that must stay real (they hold live tool session state).
-STOWED_TARGETS=(
-  "$HOME/.config/alacritty"
-  "$HOME/.config/astronvim"
-  "$HOME/.config/bat"
-  "$HOME/.config/fish"
-  "$HOME/.config/kak"
-  "$HOME/.config/mopidy"
-  "$HOME/.config/neofetch"
-  "$HOME/.config/qutebrowser"
-  "$HOME/.config/resticprofile"
-  "$HOME/.config/systemd"
-  "$HOME/.config/zellij"
-  "$HOME/.config/station"
-  "$HOME/.claude/agents"
-  "$HOME/.claude/skills"
-  "$HOME/.claude/keybindings.json"
-  "$HOME/.claude/statusline-command.sh"
-  "$HOME/.config/opencode/opencode.jsonc"
-  "$HOME/.config/opencode/plugins"
-  "$HOME/.config/opencode/agents"
-  "$HOME/.copilot/agents"
-  "$HOME/.codex/agents"
-  "$HOME/.gemini/config/agents"
-)
-conflict_found=0
-for target in "${STOWED_TARGETS[@]}"; do
-  if [[ -e "$target" && ! -L "$target" ]]; then
-    echo "  ! $target already exists as a real file or directory — stow will fold into per-file symlinks instead of one clean symlink."
-    conflict_found=1
-  fi
-done
-if [[ "$conflict_found" -eq 1 ]]; then
+if ! dotfiles::find_conflicts; then
   echo
   echo "Review the paths above, back up/remove anything that's not still needed, then re-run bootstrap.sh."
   echo "Note: ~/.claude, ~/.config/opencode, ~/.copilot, ~/.codex, and ~/.gemini/config themselves"
@@ -51,11 +24,8 @@ if [[ "$conflict_found" -eq 1 ]]; then
   exit 1
 fi
 
-echo "== Stowing dotfiles =="
-stow --target="$HOME" --dir="$DOTFILES_DIR/src" configs
-
-echo "== Stowing shell utility scripts (-> ~/.config/scripts) =="
-stow --target="$HOME/.config" --dir="$DOTFILES_DIR/src" scripts
+dotfiles::ensure_real_parents
+dotfiles::stow_all "$DOTFILES_DIR"
 
 echo "== Running tool installers =="
 INSTALLERS=(
@@ -70,6 +40,7 @@ INSTALLERS=(
   install-opencode.sh
   install-claude.sh
   install-neovim.sh
+  install-neovim-deps.sh
   install-tmux-plugins.sh
 )
 for installer in "${INSTALLERS[@]}"; do
@@ -81,7 +52,14 @@ cat <<'EOF'
 
 == Bootstrap complete. Remaining manual steps: ==
   * Open tmux and press 'prefix + I' to install the plugins TPM now knows about.
-  * Install fzf and fd (not automated — e.g. 'brew install fzf fd').
+  * Open nvim once so lazy.nvim installs the plugins, then ':MasonToolsInstall'
+    for the language servers and ':checkhealth' to confirm. Re-run
+    'scripts/install-neovim-deps.sh --check' to see what is still missing, or
+    '--all' for the optional language toolchains (zig, lldb) and the
+    toggleterm integrations (lazydocker, k9s, mc). Go is no longer in '--all':
+    a default run installs it through goenv, since install-goenv.sh only clones
+    the manager and leaves it with no toolchain.
+  * Install fzf (not automated — e.g. 'brew install fzf').
   * Copy the *.sample.zsh templates in ~/.config/station/runcom/ to their
     real names (s97_work_config.zsh, s98_secrets.zsh) and fill in real
     values — these stay untracked, same as before.

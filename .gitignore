@@ -20,6 +20,13 @@ parts/
 sdist/
 var/
 wheels/
+
+# 'lib/' above comes from the Python template and is unanchored, so it also
+# matches scripts/lib/ — the shared shell library that bootstrap.sh and
+# install.sh both source. Re-include that one directory explicitly; git will
+# not descend into an ignored directory otherwise, and the library would be
+# silently left out of every clone.
+!/scripts/lib/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
