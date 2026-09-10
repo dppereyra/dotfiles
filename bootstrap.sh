@@ -27,6 +27,15 @@ fi
 dotfiles::ensure_real_parents
 dotfiles::stow_all "$DOTFILES_DIR"
 
+# These two live OUTSIDE the repo on purpose. ~/.config/station is a symlink into
+# this working tree, so anything under it is one `git add -f` away from a public
+# repo. Keys and client identity must never sit there. Created empty; populate by
+# hand per machine.
+echo "== Creating machine-local directories (not tracked) =="
+mkdir -p "$HOME/.config/secrets"   # GPG/age keys, restic password file, PEMs
+mkdir -p "$HOME/.config/work"      # work/client gitconfig fragments
+echo "  ~/.config/secrets and ~/.config/work ready"
+
 echo "== Running tool installers =="
 INSTALLERS=(
   install-paths.sh

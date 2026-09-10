@@ -92,6 +92,12 @@ pre-flight check catches them too.
   `command-history-state.json`, `session-state/`.
 - `.history/` anywhere — VS Code Local History extension artefacts. Ignored by both
   `station/global_gitignore` and this repo's own `.gitignore`.
+- **qutebrowser runtime state.** `~/.config/qutebrowser` is a symlink into this tree, so a
+  browser writes into the repo as you use it. Only the hand-maintained config is tracked
+  (`config.py`, `autoconfig.yml`, `quickmarks`, `bookmarks/`); `.gitignore` blocks cookies,
+  `history.sqlite*`, `sessions/`, `webengine/`, `cmd-history`, `greasemonkey/` and any stray
+  `*.sqlite`/`*.db`/`*.log`, since those carry session tokens and browsing history. Note that
+  `quickmarks` and `bookmarks/urls` **are** tracked — don't bookmark a URL with a token in it.
 
 **All five tools now run the same agent fleet.** It's built around `mgr-product-owner` (the one
 agent meant to be talked to directly) coordinating a Trello-card pipeline — owning leads,
@@ -115,36 +121,71 @@ these directories without translating the frontmatter will not work.
 Once symlinked, `~/.claude/skills` serves both Claude Code and opencode — opencode reads that
 path too.
 
-### Temporary: agents are copies, not symlinks
+### Agents are generated — edit `src/agents/`, never `src/configs/*/agents/`
 
-Until the migration below completes, every `agents/` directory under `src/configs/` is a **copy**
-of its live `~/...` counterpart, and each pair will drift as agents are edited. Refresh with:
+All five `agents/` directories under `src/configs/` are **build output**. The source of truth is
+`src/agents/`, and `scripts/build-agents.py` renders every tool's format from it:
 
 ```bash
-rsync -a --delete --exclude='.history' ~/.claude/agents/          src/configs/.claude/agents/
-rsync -a --delete                      ~/.config/opencode/agents/ src/configs/.config/opencode/agents/
-rsync -a --delete                      ~/.copilot/agents/         src/configs/.copilot/agents/
-rsync -a --delete                      ~/.codex/agents/           src/configs/.codex/agents/
-rsync -a --delete                      ~/.gemini/config/agents/   src/configs/.gemini/config/agents/
+python3 scripts/build-agents.py            # rewrite all five tool trees
+python3 scripts/build-agents.py --check    # verify committed output is current (exit 1 if stale)
 ```
 
-Claude Code is the canonical source for the fleet's content — edit agents there, then re-derive
-the other four (frontmatter differs enough per tool that this isn't a plain copy; see the table
-above). After stowing, the copy-drift problem stops mattering for Claude Code and opencode: they
-become the same files, and an agent created from a Claude Code `/agents` session writes straight
-into the repo working tree and shows up in `git status`. Copilot, Codex, and Antigravity don't
-have an equivalent in-session agent-creation flow to worry about yet.
+- `src/agents/<name>.md` — one file per agent: frontmatter (`role`, `color`, `delegates`,
+  `description`) and the agent's own prose, with `{{STANDARDS}}` and `{{CLOSING}}` markers where
+  the shared blocks go.
+- `src/agents/_standards/` — the shared blocks, written once: per-`role` operating standards and
+  reporting format (`implementer`, `reviewer`) plus the Trello `card-write-back.md` protocol.
+
+An agent inherits the block for its `role` unless it defines that section inline itself. The four
+advisory agents (`mgr-product-owner`, `mgr-recruiter`, `ops-architect`, `ops-automation`) carry
+their own standards and reporting inline because those are genuinely role-specific, and the
+generator leaves them alone.
+
+Do **not** rsync the live `~/...` directories back into `src/configs/` — that would overwrite
+generated files with hand-edits and silently break the single-source model. Edit `src/agents/`,
+regenerate, then copy out (or stow, once the migration below completes).
+
+### Agents are live via Stow — no copy step
+
+All five live `~/...` agent directories are now symlinks into this repo, so
+`scripts/build-agents.py` writes straight through to what the tools actually read. There is no
+refresh step, and the copy-drift that used to leave the tracked trees weeks behind the live ones
+is now structurally impossible.
 
 ## Migration status
 
-The Stow layout **is applied on the primary machine**. All 21 entries in `bootstrap.sh`'s
-`STOWED_TARGETS` are symlinks into this repo, the conflict check passes, and `./bootstrap.sh`
-runs to completion (exit 0). `~/.station` is gone and `excludesfile` points at
-`~/.config/station/global_gitignore`.
+The Stow layout **is applied on the primary machine**. All 21 entries in `scripts/lib/stow.sh`'s
+`STOWED_TARGETS` are symlinks into this repo, `~/.config/station` exists, and `excludesfile`
+points at `~/.config/station/global_gitignore`. Only the two `stow` calls were run — the
+installer phase of `bootstrap.sh` was not, since the toolchain was moved across rather than
+rebuilt.
+
+**`~/.station` (the bare repo) is gone.** Nothing referenced it: the `mystation` aliases were
+removed from `s08_aliases.zsh` and the `includeIf gitdir:~/.station` block from `.gitconfig`.
+`$HOME` is no longer a git work-tree.
+
+### Machine-local directories outside the repo
+
+Two directories deliberately live **outside** this repo, created empty by `bootstrap.sh` and
+populated by hand per machine. `~/.config/station` is a symlink into this working tree, so
+anything under it is one `git add -f` away from a public repo — keys and client identity must
+never sit there.
+
+| Path | Holds |
+|---|---|
+| `~/.config/secrets` | GPG/age keys, `restic_repo_secret`, PEMs. `RESTIC_PASSWORD_FILE` in `s98_secrets.zsh` points here. |
+| `~/.config/work` | `work.gitconfig`, `work_gitignore`, and client fragments. `.gitconfig`'s `includeIf gitdir:~/projects/work/` points at `~/.config/work/work.gitconfig`. |
 
 Remaining cleanup:
-- `~/station` still exists as a real directory; its content now lives at `~/.config/station`.
-  Verify nothing unique is left there, then remove it.
+- `~/station` is down to under 600KB and what is left is deliberate, not pending: `containers/`
+  (its own git repo, and its compose files hold plaintext secrets — move it to `~/projects/`
+  rather than delete), `scripts/setup/` (superseded by `scripts/install-*.sh`), and copies of
+  what already moved to `~/.config/secrets` and `~/.config/work`.
+- `s97_work_config.zsh` and `s98_secrets.zsh` are **auto-created from the `.sample.zsh`
+  templates** by `s03_variables.zsh` when missing. That means a fresh machine gets empty
+  placeholders, not the real values — copy the real files across by hand, or CLI tools that
+  read those env vars will silently break.
 - Because `~/.config/station` is a symlink *into this repo*, everything the installers put under
   `$STATION_HOME` (`envs/`, `npm/`, `zinit/`, `sdk/`, …) lands in this working tree. Those paths
   are gitignored, but they mean the repo carries several hundred MB of installed toolchain that
@@ -159,7 +200,13 @@ Remaining cleanup:
 
 Two different things, both plural "scripts", easy to confuse:
 - **`scripts/`** (root) — one-shot tool installers (`install-<tool>.sh`). Not stowed. Meant to be run standalone in ephemeral cloud dev environments as well as by `bootstrap.sh`.
-- **`src/scripts/`** — everyday shell utilities (not installers), stowed to `~/.config/scripts` and put on `PATH` by `station/runcom/s04_paths.zsh`.
+- **`src/scripts/`** — the Stow *package*; everyday shell utilities (not installers), stowed to `~/.config/scripts` and put on `PATH` by `station/runcom/s04_paths.zsh`.
+
+The package deliberately nests one level — the files live in **`src/scripts/scripts/`**, not
+`src/scripts/`. Stow links a package's *contents* into the target, so a flat `src/scripts/` would
+scatter `clean-all-py`, `download-common-images` and `git/` loose into `~/.config/`. Nesting makes
+the package contain a `scripts/` directory, which is what produces the single `~/.config/scripts`
+symlink. Add new utilities to `src/scripts/scripts/`.
 
 ## Dependencies
 

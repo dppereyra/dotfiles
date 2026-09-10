@@ -38,3 +38,5 @@ codealike.json
 # Local Taskfile
 Taskfile.yml
 
+
+**/.claude/settings.local.json

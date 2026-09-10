@@ -14,13 +14,13 @@ export DOTNET_CLI_TELEMETRY_OPTOUT=1
 # export TERM="xterm-256color"
 # export ZSH_DISABLE_COMPFIX=true
 
-export HISTFILE=~/station/zsh_history
+export HISTFILE=$STATION_HOME/zsh_history
 export HISTSIZE=200000
 export SAVEHIST=100000
 
 export PYTHONWARNINGS="ignore:Unverified HTTPS request"
 
-export ZINIT_HOME="~/station/zinit"
+export ZINIT_HOME="$STATION_HOME/zinit"
 
 if [[ ! -f $STATION_RC/s97_work_config.zsh ]]
 then

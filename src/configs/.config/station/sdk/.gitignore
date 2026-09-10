@@ -1,0 +1,5 @@
+# SDKs installed here (gcloud, flutter, etc.) are large, machine-specific
+# downloads, not config. Ignore everything except this file so the directory
+# itself stays a tracked placeholder.
+*
+!.gitignore

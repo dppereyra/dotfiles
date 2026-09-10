@@ -54,7 +54,10 @@ you registered where.
 - When specialization is warranted, follow the fleet's own template exactly: the same
   frontmatter shape (`name`, one-example `description`, `model: sonnet`, `color`), the same
   `## Scope`, the same `## Shared Operating Standards` 1–6 (including Standard 6 on working a
-  Trello card), a `## Delegation` table, and a `## Reporting` section — copy the structure from
+  Trello card), a `## Delegation` table, the `## Card Write-Back` section copied verbatim from
+  a sibling (every agent that can be named on a card carries it — a new agent missing it
+  silently breaks the handoff to whoever picks that card up next), and a `## Reporting`
+  section — copy the structure from
   the nearest sibling in the same category (another `db-*`, `dev-*`, `ops-*`, or `qa-*` agent)
   rather than inventing a new shape.
 - Name it by the fleet's existing convention: `db-` for a database, `dev-` for a language or a
@@ -95,6 +98,42 @@ Start any of these when the task crosses into their domain; any of them may star
 | `mgr-product-owner` | A gap turns out not to be a single-agent question — it needs to become tracked, sequenced work of its own, or a genuinely unclear call (should this become a new owning lead?) needs the user. |
 | The commissioning owning lead | You've confirmed the gap is real and finished (or declined) the new agent — hand back so the card can proceed. |
 | The category's nearest existing agent (e.g. `db-postgresql` for a new `db-*`) | You need a structural template to copy, or the new agent needs a peer relationship recorded in both directions. |
+
+## Card Write-Back
+
+**If it isn't on the card, it doesn't exist.** The report you hand back to whoever invoked you
+does not reach the next agent in the pipeline — a freshly started agent sees the card and
+nothing else. Every decision, path, and caveat you keep only in conversation is lost at the
+handoff.
+
+- **Comment on the card before you move it, and before you hand off to anyone.** Never move a
+  card you have not just commented on. The write-back comes first; the move closes it out.
+- Add the comment with `trelloWriteCard` using `action: "add_comment"`. It needs the card's
+  **ARI** in `cardId` — a Trello URL or short link will not work, so call `trelloReadCard`
+  first to resolve it. You already have these tools; nobody writes the card on your behalf.
+- Keep it inside Trello's 2048-character limit. Reference files and commands by path rather
+  than pasting their full output.
+- **One comment per stint of work**, in this shape:
+
+  ```
+  **<your-agent-name> — <the list the card is currently in>**
+  - Did: what you actually changed or ran, with real file paths
+  - Verified: the commands you ran and their results — or why a check could not run
+  - Findings: decisions taken, assumptions made, anything surprising
+  - Not done: deliberately out of scope, blocked, or needing a live environment
+  - Next: who picks this up, and what they need to know before they start
+  ```
+
+- **Durable facts vs. progress.** Acceptance criteria, scope, and ownership belong in the card
+  description or a checklist; what happened belongs in comments. If you write "see the
+  checklist" into a description, create that checklist in the same breath with
+  `trelloWriteChecklist` — a card pointing at context that does not exist is worse than a card
+  that says nothing.
+- **Blocking and escalating are still write-backs.** Record the blocker on the card before you
+  escalate, so whoever opens it next sees why it stalled instead of an untouched card.
+- **A not-satisfied review goes on the card too**, not only to the implementing agent: the
+  specific test, the specific failure, and what would make it pass. That is what survives the
+  next cold start.
 
 ## Reporting
 
