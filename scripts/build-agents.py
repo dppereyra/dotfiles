@@ -35,6 +35,21 @@ TARGETS = {
 
 COPILOT_TOOLS = '["agent", "read", "search", "edit", "execute"]'
 
+# src/agents/ carries Claude Code's bare colour names, which are correct for
+# Claude and invalid for opencode: it accepts a quoted "#rrggbb" or one of its
+# own theme keywords, and anything else fails config validation and stops
+# opencode from starting at all. Map on the way out rather than teaching the
+# source file two vocabularies. Quoted, or YAML reads the # as a comment.
+OPENCODE_COLORS = {
+    "cyan":   "#00bcd4",
+    "green":  "#4caf50",
+    "blue":   "#2196f3",
+    "red":    "#f44336",
+    "yellow": "#ffc107",
+    "purple": "#9c27b0",
+    "orange": "#ff9800",
+}
+
 
 def parse_source(path: pathlib.Path) -> tuple[dict, str]:
     m = re.match(r"^---\n(.*?)\n---\n(.*)$", path.read_text(), re.S)
@@ -95,9 +110,12 @@ def render(tool: str, meta: dict, body: str) -> str:
                 f"model: sonnet\ncolor: {color}\n---\n\n{body}")
 
     if tool == "opencode":
+        if color not in OPENCODE_COLORS:
+            sys.exit(f"{name}: no opencode colour mapped for '{color}' "
+                     f"-- add it to OPENCODE_COLORS")
         return (f'---\ndescription: "{sdesc}"\n'
                 f'mode: {"primary" if primary else "subagent"}\n'
-                f"color: {color}\n---\n{body}")
+                f'color: "{OPENCODE_COLORS[color]}"\n---\n{body}')
 
     if tool == "copilot":
         delegates = [d.strip() for d in meta.get("delegates", "").split(",") if d.strip()]
