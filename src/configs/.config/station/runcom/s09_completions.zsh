@@ -20,19 +20,27 @@ if [[ -x "`which kubectl`" ]]; then
   source <(kubectl completion zsh)
 fi
 
-echo "Loading pyenv ..."
-eval "$(pyenv init --path)"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+if (( $+commands[pyenv] )); then
+  echo "Loading pyenv ..."
+  eval "$(pyenv init --path)"
+  eval "$(pyenv init -)"
+  eval "$(pyenv virtualenv-init -)"
+fi
 
-echo "Loading goenv ..."
-eval "$(goenv init -)"
+if (( $+commands[goenv] )); then
+  echo "Loading goenv ..."
+  eval "$(goenv init -)"
+fi
 
-echo "Loading nodenv ..."
-eval "$(nodenv init -)"
+if (( $+commands[nodenv] )); then
+  echo "Loading nodenv ..."
+  eval "$(nodenv init -)"
+fi
 
-echo "Loading rbenv ..."
-eval "$(rbenv init -)"
+if (( $+commands[rbenv] )); then
+  echo "Loading rbenv ..."
+  eval "$(rbenv init -)"
+fi
 
 # echo "Loading phpenv ..."
 # eval "$(phpenv init -)"

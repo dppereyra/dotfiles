@@ -19,12 +19,19 @@ source $STATION_RC/s09_completions.zsh
 source $STATION_RC/s10_zinit.zsh
 source $STATION_RC/s99_theme.zsh
 
-if [[ -v NEOFETCH_DISTRO ]]
-then
-  fastfetch --ascii_distro $NEOFETCH_DISTRO
-else
-  fastfetch
+# Guarded: these are cosmetic greeters and are not installed in a minimal
+# container image, where an unguarded call prints a "command not found" on
+# every single shell start.
+if (( $+commands[fastfetch] )); then
+  if [[ -v NEOFETCH_DISTRO ]]
+  then
+    fastfetch --ascii_distro $NEOFETCH_DISTRO
+  else
+    fastfetch
+  fi
 fi
 
-fortune | cowsay -f small
+if (( $+commands[fortune] )) && (( $+commands[cowsay] )); then
+  fortune | cowsay -f small
+fi
 

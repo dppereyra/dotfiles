@@ -43,5 +43,10 @@ alias userlist="cut -d: -f1 /etc/passwd"
 
 alias update-gcloud="gcloud components update"
 
-alias k8s-clear-conf="mv ~/.kube/config ~/.kube/config.bak.$(date +%Y%m%d%H%M%S)"
-alias k8s-namespace="kubectl config set-context $(kubectl config current-context) --namespace"
+# Single-quoted on purpose. Double quotes ran both substitutions when the alias
+# was *defined* — i.e. once per shell start — so k8s-clear-conf reused one frozen
+# timestamp for every backup in a session (overwriting the previous one), and
+# k8s-namespace pinned whatever context was current at login. It also meant a
+# "command not found: kubectl" on every shell start on machines without kubectl.
+alias k8s-clear-conf='mv ~/.kube/config ~/.kube/config.bak.$(date +%Y%m%d%H%M%S)'
+alias k8s-namespace='kubectl config set-context $(kubectl config current-context) --namespace'
