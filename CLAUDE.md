@@ -15,9 +15,14 @@ dotfiles/
 ├── LICENSE                (root only — outside src/, so Stow never touches it)
 ├── .stowrc                 (sets --dir=src as the default for manual `stow` invocations from the repo root)
 ├── bootstrap.sh            (personal-machine entrypoint: stow both packages, run scripts/install-*.sh)
+├── install.sh              (ephemeral-environment entrypoint — DevPod/Codespaces/Gitpod pick this
+│                             up by name; installs its own prereqs, backs conflicts up, does not abort)
 ├── scripts/                (root-level tool installers, install-<tool>.sh — NOT stowed;
-│                             usable standalone by Codespaces/DevPod/Ona, or via bootstrap.sh)
+│   │                         usable standalone by Codespaces/DevPod/Ona, or via bootstrap.sh)
+│   ├── build-agents.py     (renders every tool's agent format from src/agents/)
+│   └── lib/stow.sh         (STOWED_TARGETS + the conflict check, sourced by BOTH entrypoints)
 └── src/
+    ├── agents/              (one source per agent; build-agents.py renders the five tool trees)
     ├── configs/             (stow package #1 — target $HOME)
     │   ├── .gitconfig .gitmux.conf .ansible.cfg .p10k.zsh .tmux.conf .wezterm.lua .Xresources .zshrc
     │   ├── .ssh/{config,conf.d,keys.d,work.d}
