@@ -17,6 +17,9 @@ dotfiles/
 ├── bootstrap.sh            (personal-machine entrypoint: stow both packages, run scripts/install-*.sh)
 ├── install.sh              (ephemeral-environment entrypoint — DevPod/Codespaces/Gitpod pick this
 │                             up by name; installs its own prereqs, backs conflicts up, does not abort)
+├── claude-cloud-setup.sh   (Claude Code on the web entrypoint — called from the environment's setup
+│                             script; installs gh/az/wt/git-town, links ~/.claude agents+skills,
+│                             layers .gitconfig via ~/.config/git/config, never touches ~/.gitconfig)
 ├── scripts/                (root-level tool installers, install-<tool>.sh — NOT stowed;
 │   │                         usable standalone by Codespaces/DevPod/Ona, or via bootstrap.sh)
 │   ├── build-agents.py     (renders every tool's agent format from src/agents/)
