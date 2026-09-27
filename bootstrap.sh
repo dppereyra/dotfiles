@@ -48,8 +48,12 @@ INSTALLERS=(
   install-phpenv.sh
   install-opencode.sh
   install-claude.sh
+  install-gh.sh
+  install-az.sh
+  install-worktrunk.sh
   install-neovim.sh
   install-neovim-deps.sh
+  install-git-town.sh      # after neovim-deps: that is what gives goenv a Go
   install-tmux-plugins.sh
 )
 for installer in "${INSTALLERS[@]}"; do

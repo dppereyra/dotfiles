@@ -14,7 +14,7 @@ cd dotfiles
 1. Confirm `stow` is installed.
 2. Refuse to proceed if any stow target already exists as a real (non-symlink) file or directory — review and clear those first so Stow can create clean symlinks instead of folding into per-file ones.
 3. `stow` both packages: `src/configs` → `$HOME`, `src/scripts` → `$HOME/.config/scripts`.
-4. Run every installer in `scripts/` (asdf, pyenv, goenv, nodenv, rbenv, phpenv, zinit, opencode, claude, neovim, neovim deps, tmux plugin manager).
+4. Run every installer in `scripts/` (asdf, pyenv, goenv, nodenv, rbenv, phpenv, zinit, opencode, claude, gh, az, worktrunk, neovim, neovim deps, git-town, tmux plugin manager).
 
 `install-neovim.sh` installs the editor and clones the config. The config needs neovim 0.10 or
 newer (`plugin-manager.lua` calls `vim.uv`), which not every distro can supply: Arch-based and
@@ -82,6 +82,53 @@ environment.
 Note that `install-claude.sh` and `install-opencode.sh` both need `npm`, which minimal base images
 do not ship. Add a Node runtime in the devcontainer (e.g. the
 `ghcr.io/devcontainers/features/node:1` feature) or those two will report a failure and skip.
+
+## Claude Code on the web (cloud environments)
+
+Use `claude-cloud-setup.sh`. In the cloud environment's settings, paste this into **Setup
+script**:
+
+```bash
+#!/bin/bash
+DOTFILES_DIR="$HOME/.dotfiles"
+if [ -d "$DOTFILES_DIR/.git" ]; then
+  git -C "$DOTFILES_DIR" pull --ff-only --quiet || true
+else
+  git clone --depth 1 https://github.com/dppereyra/dotfiles "$DOTFILES_DIR" || exit 0
+fi
+"$DOTFILES_DIR/claude-cloud-setup.sh" || true
+```
+
+The paste-in only clones and delegates, so changing what a cloud session gets is a commit here,
+not a settings edit. It installs:
+
+| Tool | How | Fallback |
+|---|---|---|
+| `gh` | GitHub's apt repo (`cli.github.com`) | Ubuntu's `gh` package when that host is blocked |
+| `az` | Microsoft's apt repo (`packages.microsoft.com`) | `uv tool install azure-cli` from PyPI |
+| `wt` (worktrunk) | prebuilt musl binary from the GitHub release | `cargo install` from crates.io, updating Rust through rustup if it is too old |
+| `git-town` | `go install` through the Go module proxy | — |
+| `delta`, `git-lfs`, `shellcheck`, `fd`, `tree` | distro packages | — |
+
+It also links the agent fleet into `~/.claude/agents` and each skill into `~/.claude/skills/`,
+includes this repo's `.gitconfig` from `~/.config/git/config`, and adds worktrunk's bash
+integration to `~/.bashrc` (so `wt switch` can change directory).
+
+Why it is not `install.sh`: the cloud container is not a blank image. `~/.gitconfig` is written by
+the session itself (commit identity, SSH signing, proxy settings), so stowing ours over it breaks
+every commit — ours is layered in through `~/.config/git/config`, which git reads first, so the
+session's values win on overlap. `~/.claude/skills` already holds platform-shipped skills, so it
+cannot become a symlink. And with no interactive terminal, zsh/tmux/neovim are dead weight.
+
+Every step reports and carries on, and the script always exits 0, so one blocked package host
+cannot cost the session. Override the installer set with `CLOUD_INSTALLERS` or add distro
+packages with `CLOUD_APT_PACKAGES` in the environment's variables. Credentials go there too,
+never in this repo: `GH_TOKEN` (read by `gh` directly), and `AZURE_CLIENT_ID` /
+`AZURE_TENANT_ID` / `AZURE_CLIENT_SECRET` for `az login --service-principal`.
+
+The four new installers (`install-gh.sh`, `install-az.sh`, `install-worktrunk.sh`,
+`install-git-town.sh`) are ordinary `scripts/install-*.sh` — `bootstrap.sh` runs them too, and
+DevPod can opt in through `DOTFILES_INSTALLERS`.
 
 ## What's not automated (manual steps)
 
